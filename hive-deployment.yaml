@@ -1,3 +1,17 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: hive-pvc
+  labels:
+    name: hive-pvc
+spec:
+  storageClassName: managed-nfs-storage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
 kind: Deployment
 apiVersion: apps/v1beta1
 metadata:
@@ -17,6 +31,14 @@ spec:
         name: presto-hive
         ports:
         - containerPort: 9083
+        imagePullPolicy: Always
+        volumeMounts:
+          - mountPath: "/apps/hive/warehouse"
+            name: data-storage
+      volumes:
+      - name: data-storage
+        persistentVolumeClaim:
+          claimName: hive-pvc
       restartPolicy: Always
 ---
 apiVersion: v1

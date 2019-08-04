@@ -1,3 +1,17 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: presto-worker-pvc
+  labels:
+    name: presto-worker-pvc
+spec:
+  storageClassName: managed-nfs-storage
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+---
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
@@ -34,4 +48,11 @@ spec:
         name: worker
         ports:
         - containerPort: 8080
+        volumeMounts:
+          - mountPath: "/var/lib/presto/data"
+            name: data-storage
+      volumes:
+      - name: data-storage
+        persistentVolumeClaim:
+          claimName: presto-worker-pvc
       restartPolicy: Always
